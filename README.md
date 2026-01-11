@@ -1,6 +1,6 @@
 # Support KB Agent - Intelligent Document Q&A System
 
-> A production-ready Retrieval-Augmented Generation (RAG) pipeline with integrated MCP tools, built with LangGraph, Cohere embeddings, and OpenAI GPT LLM. Just set API keys and run!
+> A production-ready Retrieval-Augmented Generation (RAG) pipeline with integrated MCP tools, built with LangGraph, Cohere embeddings, and OpenAI GPT. Just set API keys and run!
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![LangChain](https://img.shields.io/badge/LangChain-Latest-green)
@@ -32,7 +32,7 @@ This is the complete pipeline that powers the Support KB Agent:
 - **Document Ingestion:** Load PDF, Markdown, or web pages
 - **Intelligent Chunking:** 500-token chunks with 50-token overlap
 - **Semantic Embeddings:** Cohere embeddings for high-quality search
-- **Vector Storage:** ChromaDB for fast, persistent vector search
+- **Vector Storage:** FAISS for fast, persistent vector search
 - **Answer Generation:** OpenAI GPT with source citation
 - **Performance Tracking:** Detailed metrics at each step
 
@@ -357,33 +357,33 @@ Output (Answer + Sources + Metrics)
 - Memory footprint: ~50MB for 1000 chunks
 
 #### 3. Vector Database
-**Choice:** ChromaDB
+**Choice:** FAISS (Facebook AI Similarity Search)
 
 **Why:**
-- **Fast similarity search** with cosine distance
-  - Sub-100ms retrieval for top-5 results
-  - Optimized for semantic search
-  - Scales to millions of vectors
+- **Ultra-fast similarity search** with optimized algorithms
+  - Sub-50ms retrieval for top-5 results
+  - Optimized for semantic search at scale
+  - Scales to millions of vectors efficiently
 - **Persistent storage** to disk (survives restarts)
-  - Stores in `chroma_db/` directory
+  - Stores in `faiss_index/` directory
   - No need to re-embed documents
-  - Automatic backup and recovery
-- **Metadata filtering** support
-  - Filter by document source, page number, etc.
-  - Enables advanced retrieval strategies
-  - Useful for multi-document scenarios
+  - Fast loading from disk
+- **Batch processing support**
+  - Efficiently handles large document collections
+  - Processes chunks in batches to manage memory
+  - Ideal for production deployments
 - **Easy to use** with LangChain
-  - Built-in Chroma integration
+  - Built-in FAISS integration
   - Simple API: `vectordb.similarity_search(query, k=5)`
-- **No external dependencies** (embedded mode)
-  - No need for separate database server
-  - Perfect for development and small deployments
+- **Local-first approach**
+  - No external database server required
+  - Perfect for development and production
   - Can be deployed anywhere Python runs
 
 **Performance:**
 - Similarity search: <50ms for top-5 retrieval
 - Storage: ~1MB per 1000 chunks
-- Supports up to 10M+ vectors on standard hardware
+- Batch processing: 100 chunks per batch for optimal memory usage
 
 #### 4. Retrieval Strategy
 **Choice:** Top-k retrieval (k=5) with similarity-based ranking
@@ -408,7 +408,7 @@ Output (Answer + Sources + Metrics)
 
 
 #### 5. LLM Integration
-**Choice:** OpenAI GPT-3.5-turbo with temperature=0
+**Choice:** OpenAI GPT with temperature=0
 
 **Why:**
 - **Temperature=0** ensures deterministic, factual responses
@@ -421,17 +421,16 @@ Output (Answer + Sources + Metrics)
   - Reduces hallucinations and false claims
   - Improves user trust in answers
 - **Cost-effective** for production use
-  - GPT-3.5-turbo: $0.0005 per 1K input tokens, $0.0015 per 1K output tokens
-  - Excellent value for document Q&A
+  - Affordable pricing for document Q&A
+  - Excellent value for production deployments
 - **Consistent behavior** for production use
-  - Reliable API with 99.9% uptime
+  - Reliable API with high uptime
   - Excellent error handling
   - Clear rate limiting and quotas
 - **Excellent performance** on document understanding tasks
   - Trained on diverse text data
   - Understands context and nuance
   - Generates coherent, well-structured answers
-  - Better than many open-source alternatives
 
 **Prompt Template:**
 ```

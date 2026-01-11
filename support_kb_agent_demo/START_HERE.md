@@ -65,7 +65,7 @@ jupyter notebook notebooks/support_kb_agent_demo.ipynb
 1. Loads your document (PDF, Markdown, or Web URL)
 2. Chunks it into manageable pieces (500 tokens each)
 3. Creates embeddings using Cohere
-4. Stores embeddings in ChromaDB vector database
+4. Stores embeddings in FAISS vector database
 5. Expands your query using MCP tools
 6. Retrieves relevant chunks
 7. Generates answer using OpenAI GPT

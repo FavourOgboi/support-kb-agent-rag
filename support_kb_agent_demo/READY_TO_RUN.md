@@ -245,10 +245,10 @@ Once you run the system, it automatically:
    - Captures semantic meaning
    - Enables similarity search
 
-4. **Stores in ChromaDB** vector database
+4. **Stores in FAISS** vector database
    - Persistent storage to disk
    - Fast similarity search
-   - Metadata preservation
+   - Batch processing for efficiency
 
 5. **Runs MCP tools** (automatic enhancement)
    - Expands your query into variants
