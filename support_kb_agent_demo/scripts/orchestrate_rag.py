@@ -182,12 +182,37 @@ def retrieve_answer_node(state: RAGState):
         logger.info(f"Generated answer in {elapsed:.2f}s")
 
         # Extracting source metadata
+        import re
+        answer_text = response_msg.content
+        # Find all [source] or [page] citations in the answer
+        cited_pages = set()
+        cited_sources = set()
+        # Example: [Page 3], [source], [Page: 5], [page: 7], etc.
+        page_pattern = re.compile(r"\[([Pp]age:? ?\d+)\]")
+        source_pattern = re.compile(r"\[([^\]]+)\]")
+
+        # First, extract all [Page X] citations
+        for match in page_pattern.findall(answer_text):
+            cited_pages.add(match.lower().replace("page", "").replace(":", "").strip())
+
+        # Then, extract all [source] style citations (if any)
+        for match in source_pattern.findall(answer_text):
+            if match.lower().startswith("page"):
+                cited_pages.add(match.lower().replace("page", "").replace(":", "").strip())
+            else:
+                cited_sources.add(match.strip())
+
+        # Build filtered sources list
         sources = []
         for doc in docs:
-            sources.append({
-                "source": doc.metadata.get("source", "Unknown"),
-                "page": doc.metadata.get("page", "N/A"),
-            })
+            doc_source = doc.metadata.get("source", "Unknown")
+            doc_page = str(doc.metadata.get("page", "N/A")).lower().replace("page", "").replace(":", "").strip()
+            # If any citation matches this doc's page or source, include it
+            if (doc_page in cited_pages) or (doc_source in cited_sources) or not (cited_pages or cited_sources):
+                sources.append({
+                    "source": doc_source,
+                    "page": doc.metadata.get("page", "N/A"),
+                })
 
         metadata = state.get("response_metadata", {})
         metadata.update({
