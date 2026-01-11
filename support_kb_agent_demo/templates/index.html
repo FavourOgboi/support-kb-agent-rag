@@ -40,41 +40,48 @@
 
                 <!-- Query Form -->
 <form method="post" id="queryForm" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="input_type">Document Type</label>
-        <select name="input_type" id="input_type" required>
-            <option value="pdf">PDF Document</option>
-            <option value="md">Markdown File</option>
-            <option value="web">Web Page</option>
-        </select>
-    </div>
+    {% if document_loaded %}
+        <div class="form-group" style="margin-bottom: 1rem; background: var(--bg-tertiary); padding: 1rem; border-radius: 6px;">
+            <strong>Document loaded:</strong> {{ document_name }}
+            <button type="button" class="btn btn-danger" id="remove-document-btn" style="margin-left: 1rem;">Remove Document</button>
+        </div>
+    {% else %}
+        <div class="form-group">
+            <label for="input_type">Document Type</label>
+            <select name="input_type" id="input_type" required>
+                <option value="pdf">PDF Document</option>
+                <option value="md">Markdown File</option>
+                <option value="web">Web Page</option>
+            </select>
+        </div>
 
-    <div class="form-group" id="file-upload-group" style="display: none;">
-        <label for="input_file" id="file-label">Upload File</label>
-        <input
-            type="file"
-            name="input_file"
-            id="input_file"
-            accept=""
-        >
-        <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;" id="file-help">
-            Upload a file from your computer
-        </small>
-    </div>
+        <div class="form-group" id="file-upload-group" style="display: none;">
+            <label for="input_file" id="file-label">Upload File</label>
+            <input
+                type="file"
+                name="input_file"
+                id="input_file"
+                accept=""
+            >
+            <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;" id="file-help">
+                Upload a file from your computer
+            </small>
+        </div>
 
-    <div class="form-group" id="path-url-group">
-        <label for="input_path">File Path or URL</label>
-        <input
-            type="text"
-            name="input_path"
-            id="input_path"
-            placeholder="e.g., ../data/sample.pdf or https://example.com"
-            required
-        >
-        <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;">
-            Provide the path to your document or a web URL
-        </small>
-    </div>
+        <div class="form-group" id="path-url-group">
+            <label for="input_path">File Path or URL</label>
+            <input
+                type="text"
+                name="input_path"
+                id="input_path"
+                placeholder="e.g., ../data/sample.pdf or https://example.com"
+                required
+            >
+            <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;">
+                Provide the path to your document or a web URL
+            </small>
+        </div>
+    {% endif %}
 
                     <div class="form-group">
                         <label for="question">Your Question</label>
@@ -101,11 +108,14 @@
 
                 <!-- Answer Display -->
                 {% if answer %}
-                <div class="answer-section">
+                <div class="answer-section" id="answer-section">
                     <h3>Agent Response</h3>
-                    <div class="answer-text">
+                    <div class="answer-text" id="answer-text">
                         {{ answer }}
                     </div>
+                    <button type="button" class="btn btn-secondary" id="refresh-answer-btn" style="margin-top: 1rem;">
+                        Refresh
+                    </button>
 
                     <!-- Sources Display -->
                     {% if sources and sources|length > 0 %}
@@ -202,12 +212,31 @@
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Refresh button logic: clears only the answer section
+        const refreshBtn = document.getElementById('refresh-answer-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                const answerSection = document.getElementById('answer-section');
+                if (answerSection) {
+                    answerSection.style.display = 'none';
+                }
+            });
+        }
+        // Remove Document button logic
+        const removeDocBtn = document.getElementById('remove-document-btn');
+        if (removeDocBtn) {
+            removeDocBtn.addEventListener('click', function() {
+                fetch('/remove_document', { method: 'POST' })
+                    .then(() => window.location.reload());
+            });
+        }
         // Form handling with loading overlay
         document.getElementById('queryForm').addEventListener('submit', function(e) {
             document.getElementById('loading-overlay').style.display = 'flex';
         });
 
-        // Dynamic file input logic
+        // Dynamic file input logic (only if document is not loaded)
+        {% if not document_loaded %}
         const inputType = document.getElementById('input_type');
         const fileGroup = document.getElementById('file-upload-group');
         const fileInput = document.getElementById('input_file');
@@ -252,6 +281,7 @@
 
         inputType.addEventListener('change', updateInputFields);
         updateInputFields();
+        {% endif %}
     });
     </script>
 </body>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import os
 import sys
 import logging
@@ -22,6 +22,7 @@ template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "te
 static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static"))
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config['JSON_SORT_KEYS'] = False
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "supersecretkey")
 
 # Global cache for RAG graph
 _rag_graph_cache = None
@@ -71,17 +72,43 @@ def index():
                 ext = os.path.splitext(uploaded_file.filename)[1].lower()
                 if ext not in allowed_types.get(input_type, []):
                     error = f"Invalid file type for {input_type.upper()}. Please upload a {', '.join(allowed_types[input_type])} file."
-                    return render_template("index.html", answer=answer, sources=sources, metadata=metadata, error=error)
+                    document_loaded = bool(session.get('input_path'))
+                    document_name = os.path.basename(session['input_path']) if session.get('input_path') else None
+                    return render_template(
+                        "index.html",
+                        answer=answer,
+                        sources=sources,
+                        metadata=metadata,
+                        error=error,
+                        document_loaded=document_loaded,
+                        document_name=document_name
+                    )
                 # Save file to data directory
                 data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
                 os.makedirs(data_dir, exist_ok=True)
                 save_path = os.path.join(data_dir, uploaded_file.filename)
                 uploaded_file.save(save_path)
                 input_path = save_path
+                session['input_path'] = input_path  # Store in session
+                session['input_type'] = input_type
+            elif not input_path and session.get('input_path'):
+                # No new file/path, use session's stored path
+                input_path = session['input_path']
+                input_type = session.get('input_type', input_type)
 
             if (not input_path or input_path.strip() == "") or not question:
                 error = "Please provide a file (or path/URL) and a question"
-                return render_template("index.html", answer=answer, sources=sources, metadata=metadata, error=error)
+                document_loaded = bool(session.get('input_path'))
+                document_name = os.path.basename(session['input_path']) if session.get('input_path') else None
+                return render_template(
+                    "index.html",
+                    answer=answer,
+                    sources=sources,
+                    metadata=metadata,
+                    error=error,
+                    document_loaded=document_loaded,
+                    document_name=document_name
+                )
 
             logger.info(f"Processing query: {question[:50]}...")
 
@@ -113,7 +140,17 @@ def index():
             error = f"Error processing query: {str(e)}"
             logger.error(error)
 
-    return render_template("index.html", answer=answer, sources=sources, metadata=metadata, error=error)
+    document_loaded = bool(session.get('input_path'))
+    document_name = os.path.basename(session['input_path']) if session.get('input_path') else None
+    return render_template(
+        "index.html",
+        answer=answer,
+        sources=sources,
+        metadata=metadata,
+        error=error,
+        document_loaded=document_loaded,
+        document_name=document_name
+    )
 
 @app.route("/api/query", methods=["POST"])
 def api_query():
@@ -149,6 +186,13 @@ def api_query():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/remove_document", methods=["POST"])
+def remove_document():
+    """Remove the loaded document from the session."""
+    session.pop("input_path", None)
+    session.pop("input_type", None)
+    return ("", 204)
 
 if __name__ == "__main__":
     print("=" * 60)
