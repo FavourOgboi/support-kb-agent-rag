@@ -1,0 +1,38 @@
+# Core LangChain dependencies
+langchain>=0.1.0
+langchain-community>=0.0.1
+langchain-cohere>=0.1.0
+langchain-google-genai>=0.0.1
+langgraph>=0.0.1
+
+# Vector database
+chromadb>=0.4.0
+
+# API clients
+cohere>=5.0.0
+google-generativeai>=0.3.0
+
+# Document processing
+pypdf>=3.0.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+unstructured>=0.10.0
+
+# Web utilities
+requests>=2.31.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# Optional: for better performance
+numpy>=1.24.0
+pandas>=2.0.0
+
+# FAISS for local vector search
+faiss-cpu>=1.7.4
+langchain-community>=0.0.1
+
+# OpenAI LLM support
+openai>=1.0.0
+langchain-openai>=0.0.1
