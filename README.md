@@ -664,29 +664,6 @@ sources_count      - Number of sources cited
 
 ---
 
-## LLM Configuration: OpenAI GPT
-
-**Status:** ✅ Production Ready
-
-The system uses OpenAI GPT for LLM answer generation.
-
-### Configuration
-
-| Component | Value |
-|-----------|-------|
-| LLM | OpenAI GPT-3.5-turbo |
-| Import | `langchain_openai.ChatOpenAI` |
-| API Key | `OPENAI_API_KEY` |
-| Dependency | `openai>=1.0.0` |
-| Temperature | 0 (deterministic) |
-
-### Why OpenAI?
-
-✅ **Cost-effective** - GPT-3.5-turbo is affordable for production
-✅ **Reliable** - Proven track record with 99.9% uptime
-✅ **Production ready** - ChatOpenAI is well-supported and stable
-✅ **Excellent for RAG** - GPT-3.5-turbo excels at document understanding
-✅ **Consistent quality** - Generates accurate, well-structured answers
 
 ### Configuration Files
 
@@ -715,7 +692,7 @@ A: Yes! Keys are stored in `.env` (never committed to git) and loaded via `pytho
 A: Yes! Use `--no-mcp` flag: `python scripts/orchestrate_rag.py --no-mcp ...`
 
 **Q: What's the cost?**
-A: Cohere has a free tier (1M calls/month). OpenAI is paid but very affordable - GPT-3.5-turbo costs ~$0.002 per query.
+A: Cohere has a free tier (1M calls/month). OpenAI is paid but very affordable.
 
 ---
 
