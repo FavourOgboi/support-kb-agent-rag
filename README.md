@@ -739,6 +739,4 @@ Future enhancements:
 - Add rate limiting
 - Implement caching
 
----
 
-Built for the Sowiz AI Engineering Internship
